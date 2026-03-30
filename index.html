@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Todo App</title>
+  <title>Advanced Todo App</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
       color: white;
       display: flex;
       justify-content: center;
@@ -17,30 +17,57 @@
     .container {
       background: #1e293b;
       padding: 20px;
-      border-radius: 10px;
-      width: 350px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      border-radius: 15px;
+      width: 380px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: scale(0.9);}
+      to {opacity: 1; transform: scale(1);}
     }
 
     h2 {
       text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
     }
 
     input {
-      width: 70%;
+      flex: 1;
       padding: 10px;
+      border-radius: 8px;
       border: none;
-      border-radius: 5px;
       outline: none;
     }
 
     button {
       padding: 10px;
       border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .add-btn {
       background: #38bdf8;
       color: black;
-      border-radius: 5px;
-      cursor: pointer;
+    }
+
+    .clear-btn {
+      width: 100%;
+      margin-top: 10px;
+      background: #ef4444;
+      color: white;
+    }
+
+    button:hover {
+      transform: scale(1.05);
     }
 
     ul {
@@ -53,75 +80,125 @@
       background: #334155;
       padding: 10px;
       margin-bottom: 10px;
-      border-radius: 5px;
+      border-radius: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      animation: slideIn 0.3s ease;
     }
 
-    .delete {
-      background: red;
-      color: white;
-      border: none;
-      padding: 5px;
+    @keyframes slideIn {
+      from {transform: translateX(-20px); opacity: 0;}
+      to {transform: translateX(0); opacity: 1;}
+    }
+
+    .task-text {
       cursor: pointer;
-      border-radius: 5px;
+      flex: 1;
     }
 
     .completed {
       text-decoration: line-through;
-      opacity: 0.6;
+      opacity: 0.5;
     }
+
+    .actions button {
+      margin-left: 5px;
+      padding: 5px;
+      font-size: 12px;
+    }
+
+    .edit {
+      background: #facc15;
+    }
+
+    .delete {
+      background: #ef4444;
+      color: white;
+    }
+
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Todo App</h2>
-  <input type="text" id="taskInput" placeholder="Enter task...">
-  <button onclick="addTask()">Add</button>
+  <h2>🚀 Todo App</h2>
+
+  <div class="input-area">
+    <input type="text" id="taskInput" placeholder="Enter task...">
+    <button class="add-btn" onclick="addTask()">Add</button>
+  </div>
 
   <ul id="taskList"></ul>
+
+  <button class="clear-btn" onclick="clearAll()">Clear All</button>
 </div>
 
 <script>
-  function addTask() {
-    const input = document.getElementById("taskInput");
-    const taskText = input.value.trim();
+  const input = document.getElementById("taskInput");
+  const list = document.getElementById("taskList");
 
-    if (taskText === "") return;
+  // Enter key support
+  input.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") addTask();
+  });
+
+  function addTask() {
+    const text = input.value.trim();
+    if (text === "") return;
 
     const li = document.createElement("li");
+
     li.innerHTML = `
-      <span onclick="toggleTask(this)">${taskText}</span>
-      <button class="delete" onclick="deleteTask(this)">X</button>
+      <span class="task-text" onclick="toggleTask(this)">${text}</span>
+      <div class="actions">
+        <button class="edit" onclick="editTask(this)">✏️</button>
+        <button class="delete" onclick="deleteTask(this)">X</button>
+      </div>
     `;
 
-    document.getElementById("taskList").appendChild(li);
-
+    list.appendChild(li);
     input.value = "";
     saveData();
   }
 
-  function deleteTask(button) {
-    button.parentElement.remove();
+  function deleteTask(btn) {
+    btn.parentElement.parentElement.remove();
     saveData();
   }
 
-  function toggleTask(task) {
-    task.classList.toggle("completed");
+  function toggleTask(el) {
+    el.classList.toggle("completed");
     saveData();
+  }
+
+  function editTask(btn) {
+    const span = btn.parentElement.previousElementSibling;
+    const newText = prompt("Edit task:", span.innerText);
+
+    if (newText !== null && newText.trim() !== "") {
+      span.innerText = newText;
+      saveData();
+    }
+  }
+
+  function clearAll() {
+    if (confirm("Are you sure?")) {
+      list.innerHTML = "";
+      saveData();
+    }
   }
 
   function saveData() {
-    localStorage.setItem("data", document.getElementById("taskList").innerHTML);
+    localStorage.setItem("todoData", list.innerHTML);
   }
 
   function showData() {
-    document.getElementById("taskList").innerHTML = localStorage.getItem("data") || "";
+    list.innerHTML = localStorage.getItem("todoData") || "";
   }
 
   showData();
 </script>
+
 </body>
-</html>
+</html> 
